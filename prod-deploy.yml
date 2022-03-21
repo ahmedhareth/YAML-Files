@@ -1,0 +1,102 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: prod
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: prod
+  template:
+    metadata:
+      labels:
+        app: prod
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<h1>Welcome To <font color=blue>Free Zone Web Application</font></h1>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: dev
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod
+spec:
+  type: ClusterIP
+  selector:
+    app: prod
+  ports:
+  - port: 80
+    targetPort: 80
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: qc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: qc
+  template:
+    metadata:
+      labels:
+        app: qc
+    spec:
+      volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<h1>Welcome To <font color=green>Quality Web Application</font></h1>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: qc-container
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: qc
+spec:
+  type: ClusterIP
+  selector:
+    app: qc
+  ports:
+  - port: 80
+    targetPort: 80
+     volumes:
+      - name: webdata
+        emptyDir: {}
+      initContainers:
+      - name: web-content
+        image: busybox
+        volumeMounts:
+        - name: webdata
+          mountPath: "/webdata"
+        command: ["/bin/sh", "-c", 'echo "<h1>Welcome To <font color=blue>Development Web Application</font></h1>" > /webdata/index.html']
+      containers:
+      - image: nginx
+        name: dev
+        volumeMounts:
+        - name: webdata
+          mountPath: "/usr/share/nginx/html"

@@ -1,0 +1,76 @@
+https://docs.nginx.com/nginx-ingress-controller/installation/installation-with-manifests/
+
+This is the documentation with steps to setup Ingress HAproxy (Loadbalancer) on the Kubernetes Master node that verify and validate the ingress resources like traffic coming from outside (internet) ,
+ 1. first it goes first to the front end ingress.
+ 2. then it forwards the traffic to the backend ingress.
+ 3. then it sneds to the ingress kubernetes service "ingress controller" 
+
+
+$ sudo yum update
+
+$ sudo yum install haproxy
+
+$ haproxy version 
+
+Frontend - It receives the requests from the clients.
+
+Update frontend, backend configuration of haproxy.cfg 
+
+cd /etc/haproxy/haproxy.cfg
+
+frontend Local_Server
+    bind *:80
+    mode http
+    default_backend k8s-masternode-01
+
+    backend k8s_server
+    mode http
+    balance roundrobin
+    server web.domain.com  192.168.10.130:8080
+
+    check the configuration is validated
+
+    haproxy -c -f /etc/haproxy/haproxy.cfg
+
+    $ sudo service haproxy restart
+
+ 4. Setup kubernetes Ingress controller
+#1
+k apply -f common/ns-and-sa.yaml
+#2
+k apply -f rbac/rbac.yaml
+#3
+k apply -f rbac/ap-rbac.yaml
+#4
+kubectl apply -f rbac/apdos-rbac.yaml
+#5
+k apply -f common/default-server-secret.yaml
+#6
+k apply -f common/nginx-config.yaml
+#7
+kubectl apply -f common/ingress-class.yaml
+#8
+kubectl apply -f common/crds/k8s.nginx.org_virtualservers.yaml
+#9
+kubectl apply -f common/crds/k8s.nginx.org_virtualserverroutes.yaml
+#10
+kubectl apply -f common/crds/k8s.nginx.org_transportservers.yaml
+#11
+kubectl apply -f common/crds/k8s.nginx.org_policies.yaml
+
+
+Resources for NGINX App Protect Provided by F5.com
+$ kubectl apply -f common/crds/appprotect.f5.com_aplogconfs.yaml
+$ kubectl apply -f common/crds/appprotect.f5.com_appolicies.yaml
+$ kubectl apply -f common/crds/appprotect.f5.com_apusersigs.yaml
+
+Resources for NGINX App Protect Dos attack provided by F5.com
+$ kubectl apply -f common/crds/appprotectdos.f5.com_apdoslogconfs.yaml
+$ kubectl apply -f common/crds/appprotectdos.f5.com_apdospolicy.yaml
+$ kubectl apply -f common/crds/appprotectdos.f5.com_dosprotectedresources.yaml
+
+Run the Ingress Controller 
+$ kubectl apply -f deployment/nginx-ingress.yaml
+
+Check that the Ingress Controller is Running 
+kubectl get pods --namespace=nginx-ingress

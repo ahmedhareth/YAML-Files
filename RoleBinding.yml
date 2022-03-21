@@ -1,0 +1,15 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+   name: default-dev-rolebinding
+   namespace: connect-devops
+subjects:
+- kind: ServiceAccount
+  name: devops-svc
+  namespace: connect-devops
+roleRef:
+  kind: Role
+  name: default-dev-role
+  apiGroup: rbac.authorization.k8s.io
+
+  
