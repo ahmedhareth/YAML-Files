@@ -1,0 +1,27 @@
+IP Address Configuration /commands
+
+How do I list network interfaces in RHEL 8?
+One can use ip command as follows:
+$ ip a show
+$ nmcli device status
+$ nmcli device show ens3
+To see the NetworkManager connections, run:
+$ nmcli connection
+Here is a typical DHCP configration for ens3 (stored in /etc/sysconfig/network-scripts/ifcfg-ens3 file):
+$ cat /etc/sysconfig/network-scripts/ifcfg-ens3
+
+One can run the following nmcli commands. Let us set static IPv4 IP address to 192.168.10.131/24:
+sudo nmcli con mod ens160 ipv4.addresses 192.168.10.100/24
+sudo nmcli con mod ens160 ipv4.gateway 192.168.10.2
+sudo nmcli con mod ens160 ipv4.method manual
+sudo nmcli con mod ens160 ipv4.dns "192.168.10.2"
+sudo nmcli con up ens160
+
+Viewing updated config file
+$ cat /etc/sysconfig/network-scripts/ifcfg-ens160
+
+If you edit /etc/sysconfig/network-scripts/ifcfg-ens160 file using a text editor, 
+you must reload changes using any one of the following command:
+$ sudo nmcli connection reload ## reload all connections ##
+$ sudo nmcli con load /etc/sysconfig/network-scripts/ifcfg-ens160 ## reload only ens160 by config file ##
+$ sudo nmcli con up ens160 ## reload by connection name

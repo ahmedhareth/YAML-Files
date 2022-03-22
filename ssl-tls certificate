@@ -1,0 +1,41 @@
+CONFIGURING A TLS CERTIFICATE IN KUBERNETES
+TUESDAY, March 22, 2022
+This week I was given the assignment to update a TLS certificate on one of our Kubernetes clusters from a .pfx file and so 
+I though I would share how I solved it and hopefully it can help someone else in the same situation.
+
+1. Extract the .key file from the .pfx file:
+
+openssl pkcs12 -in nupco.pfx -nocerts -out key-filename.key
+2. Decrypt the .key file:
+
+openssl rsa -in key-filename.key -out key-2022.key
+3. Extract the .crt file from .pfx file:
+
+openssl pkcs12 -in nupco.pfx -clcerts -nokeys -out crt-2022.crt
+4. Create a secret in your Kubernetes cluster:
+
+kubectl create secret tls prod-tls -n prod --cert crt-2022.crt --key key-2022.key
+kubectl create secret tls stag-tls -n stag --cert crt-2022.crt --key key-2022.key
+kubectl create secret tls dev-tls -n dev --cert crt-2022.crt --key key-2022.key
+kubectl create secret tls qc-tls -n qc --cert crt-2022.crt --key key-2022.key
+(ps. you can also define you secrets in a .yml file but that's not the approach I took this time.)
+
+5. Verify that your new secret exists in your clusters namespace:
+
+kubectl get secret -n your-namespace
+6. Update your Ingress tls to match your new secret:
+
+kind: Ingress
+metadata:
+  name: your-ingress
+spec:
+  tls:
+  - secretName: your-secret-name      
+  - hosts: 
+    - your-host-name.com
+7. Apply using continuous deployment or manually using:
+
+kubectl apply -f your-ingress.yml
+8. Test your new https host (wait five minutes after deploy):
+
+curl -v https://your-host-name.com
