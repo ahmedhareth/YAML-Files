@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
    name: default-dev-role
-   namespace: connect-devops
+   namespace: azuredevops-k8s
 rules:
   - apiGroups: ["*","apps","extensions"]
     resources: ["deployments","pods","services","secrets","pods/logs"]
