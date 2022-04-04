@@ -5,8 +5,8 @@ metadata:
    namespace: connect-devops
 subjects:
 - kind: ServiceAccount
-  name: devops-svc
-  namespace: connect-devops
+  name: azure-k8s-admin
+  namespace: azuredevops-k8s
 roleRef:
   kind: Role
   name: default-dev-role
